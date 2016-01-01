@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "test": "mocha ./test/index.js",
+    "test": "mocha ./index.test.js",
     "watch-test": "gulp watch-test"
   },
   "dependencies": {
@@ -12,6 +12,7 @@
     "gulp-mocha": "2.0.1",
     "mongoose": "4.0.3",
     "superagent": "*",
-    "wagner-core": "*"
+    "wagner-core": "*",
+    "http-status": "0.1.8"
   }
 }
