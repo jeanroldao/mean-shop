@@ -2,8 +2,8 @@ var mongoose = require('mongoose');
 
 var categorySchema = {
   _id: {type: String, required: true},
-  parent: {type: String},
-  ancestors: [{type: String}]
+  parent: String,
+  ancestors: [String]
 };
 
 module.exports = new mongoose.Schema(categorySchema);
