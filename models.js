@@ -10,4 +10,8 @@ module.exports = function(wagner) {
   wagner.factory('Product', function() {
     return mongoose.model('Product', require('./schema.product'), 'products');
   });
+  
+  wagner.factory('User', function() {
+    return mongoose.model('User', require('./schema.user'), 'users');
+  });
 };
