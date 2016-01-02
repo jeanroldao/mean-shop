@@ -21,7 +21,6 @@ function setupAuth(User, app) {
   });
   
   passport.use(new FacebookStrategy(facebookAuthData, function(accessToken, refreshToken, profile, done) {
-    console.log(JSON.stringify(profile));
     if (!profile.emails || !profile.emails.length) {
       done('No emails associated with this account');
       return;
