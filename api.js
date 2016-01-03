@@ -8,6 +8,18 @@ module.exports = function(wagner) {
   
   api.use(bodyparser.json());
   
+  api.get('/product/text/:query', wagner.invoke(function(Product) {
+    return function(req, res) {
+      Product
+        .find(
+          { $text: { $search: req.params.query } },
+          { score: { $meta: 'textScore' } })
+        .sort({ score: { $meta: 'textScore' } })
+        .limit(10)
+        .exec(utils.handleMany('products', res));
+    };
+  }));
+  
   api.post('/checkout', wagner.invoke(function(User, Stripe) {
     return function(req, res) {
       if (!req.user) {
