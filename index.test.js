@@ -14,6 +14,7 @@ describe("Category API", function() {
     var app = express();
     
     require('./models')(wagner);
+    require('./dependencies')(wagner);
     app.use(require('./api')(wagner));
     
     server = app.listen(3000);
@@ -92,6 +93,7 @@ describe("Product API", function() {
     var app = express();
     
     require('./models')(wagner);
+    require('./dependencies')(wagner);
     app.use(require('./api')(wagner));
     
     server = app.listen(3000);
@@ -183,15 +185,15 @@ describe("Product API", function() {
     
     Category.create(categories, function(error, categories) {
       assert.ifError(error);
-      console.log('categories created');
+      //console.log('categories created');
       Product.create(products, function(error, products) {
         assert.ifError(error);
-        console.log('products created');
+        //console.log('products created');
         
         var url = URL_ROOT + '/product/category/Electronics';
         superagent.get(url, function(error, res) {
             assert.ifError(error);
-            console.log('get Electronics');
+            //console.log('get Electronics');
             
             var result;
             assert.doesNotThrow(function() {
@@ -285,6 +287,7 @@ describe("Product API", function() {
     var app = express();
     
     require('./models')(wagner);
+    require('./dependencies')(wagner);
     
     app.use(function(req, res, next) {
       User.findOne({}, function(error, user) {
@@ -361,7 +364,7 @@ describe("Product API", function() {
         assert.ifError(error);
         User.remove({}, function(error) {
           assert.ifError(error);
-          console.log('all old data removed');
+          //console.log('all old data removed');
           
           Category.create(categories, function(error, categories) {
             assert.ifError(error);
@@ -413,7 +416,6 @@ describe("Product API", function() {
         
         superagent.get(url, function(error, res) {
           assert.ifError(error);
-          
           assert.equal(res.status, status.OK);
           
           var result;
@@ -431,4 +433,122 @@ describe("Product API", function() {
     });
   });
   
+});
+
+describe("Charge API", function() {
+  var server;
+  var Category;
+  var Product;
+  var User;
+  var Stripe;
+  
+  var PRODUCT_ID = '000000000000000000000001';
+
+  before(function(){
+    var app = express();
+    
+    require('./models')(wagner);
+    require('./dependencies')(wagner);
+    
+    app.use(function(req, res, next) {
+      User.findOne({}, function(error, user) {
+        assert.ifError(error);
+        req.user = user;
+        next();
+      });
+    });
+    
+    app.use(require('./api')(wagner));
+    
+    server = app.listen(3000);
+    
+    Category = wagner.get('Category');
+    Product = wagner.get('Product');
+    User = wagner.get('User');
+    Stripe = wagner.get('Stripe');
+  });
+  
+  after(function(){
+    server.close();
+  });
+    
+  beforeEach(function(done) {
+        
+    var users = [{
+      profile: {
+        username: 'jeanroldao',
+        picture: 'http://gis-production.s3.amazonaws.com/profile_photos/medium/1447551095.jpg'
+      },
+      data: {
+        oauth: 'invalid',
+        cart: []
+      }
+    }];
+    
+    var products = [
+      { 
+        _id: PRODUCT_ID,
+        name: 'Asus Zenbook',
+        category: { _id: 'Laptops', ancestors: ['Electronics', 'Laptops']},
+        price: {
+          amount: 2000,
+          currency: 'USD'
+        }
+      }
+    ];
+    
+    User.remove({}, function(error) {
+      assert.ifError(error);
+      User.create(users, function(error, users) {
+        assert.ifError(error);
+        Product.remove({}, function(error) {
+          assert.ifError(error);
+          Product.create(products, function(error, products) {
+            assert.ifError(error);
+            done();
+          });
+        });
+      });
+    });
+  });
+  
+  it('cart check out', function(done) {
+    this.timeout(15000);
+    
+    var url = URL_ROOT + '/checkout';
+    
+    User.findOne({}, function(error, user) {
+      assert.ifError(error);
+      user.data.cart = [{ product: PRODUCT_ID, quantity: 1 }];
+      user.save(function(error) {
+        superagent.post(url)
+          .send({
+            stripeToken: {
+              number: '4242424242424242',
+              cvc: '123',
+              exp_month: '12',
+              exp_year: '2016'
+            }
+          })
+          .end(function(error, res) {
+            assert.ifError(error);
+            
+            assert.equal(res.status, status.OK);
+            
+            var result;
+            assert.doesNotThrow(function() {
+              result = JSON.parse(res.text);
+            });
+            assert.ok(result.id);
+            
+            Stripe.charges.retrieve(result.id, function(error, charge) {
+              assert.ifError(error);
+              assert.ok(charge);
+              assert.equal(charge.amount, 2000 * 100);
+              done();
+            });
+          });
+      });
+    });
+  });
 });
