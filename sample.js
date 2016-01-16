@@ -1,0 +1,1 @@
+module.exports = "Nova string 2";

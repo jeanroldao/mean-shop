@@ -1,7 +1,9 @@
 {
   "scripts": {
     "test": "mocha ./index.test.js",
-    "watch-test": "gulp watch-test"
+    "watch-test": "gulp watch-test",
+    "watch": "gulp watch",
+    "karma": "karma start ./karma.local.conf.js"
   },
   "dependencies": {
     "express": "4.12.3",
@@ -12,8 +14,14 @@
     "underscore": "1.5.2",
     "mongodb": "2.0.35",
     "mocha": "2.2.4",
+    "karma": "0.12.16",
+    "karma-chai": "0.1.0",
+    "karma-chrome-launcher": "0.1.4",
+    "karma-mocha": "0.1.4",
+    "browserify": "10.2.3",
     "gulp": "3.8.11",
     "gulp-mocha": "2.0.1",
+    "gulp-browserify": "0.5.1",
     "mongoose": "4.0.3",
     "superagent": "*",
     "wagner-core": "*",
