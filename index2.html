@@ -1,1 +1,12 @@
-<script src="bin/index1.js"></script>
+<html ng-app="myApp">
+  <head>
+    <script type="text/javascript" 
+      src="https://ajax.googleapis.com/ajax/libs/angularjs/1.4.0/angular.js">
+    </script>
+    <script type="text/javascript" src="/app.js"></script>
+  </head>
+  <body>
+    <a ng-repeat="m in menus" href="#{{m.text}}">{{m.text}} <br></a>
+    <user-menu></user-menu>
+  </body>
+</html>
